@@ -29,5 +29,6 @@ To use the DataTable component, follow these steps:
     yarn install
     
 4.Start the development server:
+
     yarn start
 
