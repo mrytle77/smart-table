@@ -206,7 +206,27 @@ const DataTable = () => {
         </AccordionDetails>
       </Accordion>
       <Grid container spacing={2} alignItems="center" mt={2}>
-        <Grid item xs={12} sm={6} md={4}>
+        
+        <Grid item xs={8} sm={6} md={4}>
+          <TextField
+            label="Filter"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={filterText}
+            onChange={handleFilterTextChange}
+            InputProps={{
+              endAdornment: (
+                <Tooltip title="Search">
+                  <IconButton>
+                    <SearchIcon />
+                  </IconButton>
+                </Tooltip>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={3} sm={6} md={4}>
           <FormControl fullWidth variant="outlined" margin="normal">
             <InputLabel id="column-select-label">Columns</InputLabel>
             <Select
@@ -230,26 +250,7 @@ const DataTable = () => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <TextField
-            label="Filter"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={filterText}
-            onChange={handleFilterTextChange}
-            InputProps={{
-              endAdornment: (
-                <Tooltip title="Search">
-                  <IconButton>
-                    <SearchIcon />
-                  </IconButton>
-                </Tooltip>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={12} md={4}>
+        <Grid item xs={1} sm={12} md={4}>
           <Button variant="contained" color="secondary" onClick={handleReset} fullWidth>
             Reset
           </Button>
