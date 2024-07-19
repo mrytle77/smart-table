@@ -23,6 +23,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   Button,
+  Divider,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
@@ -185,13 +186,13 @@ const DataTable = () => {
   }
 
   return (
-    <Paper>
+    <Paper elevation={3} style={{ padding: 16 }}>
       <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Filters</Typography>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="filter-accordion-header">
+          <Typography variant="h6">Filters</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Grid container spacing={2} alignItems="center">
+          <Grid container spacing={2}>
             {allColumns.map(column => (
               <Grid item xs={12} sm={6} md={4} key={column}>
                 {renderFilterInput(column)}
@@ -199,17 +200,17 @@ const DataTable = () => {
             ))}
           </Grid>
           <Box display="flex" justifyContent="flex-end" mt={2}>
-            <Button variant="contained" color="primary" onClick={() => setFilters({})}>
+            <Button variant="outlined" color="primary" onClick={() => setFilters({})}>
               Clear Filters
             </Button>
           </Box>
         </AccordionDetails>
       </Accordion>
-      <Grid container spacing={2} alignItems="center" mt={2}>
-        
-        <Grid item xs={8} sm={6} md={4}>
+      <Divider sx={{ my: 2 }} />
+      <Grid container spacing={2} alignItems="center" mb={2}>
+        <Grid item xs={12} sm={8} md={6}>
           <TextField
-            label="Filter"
+            label="Search"
             variant="outlined"
             fullWidth
             margin="normal"
@@ -218,7 +219,7 @@ const DataTable = () => {
             InputProps={{
               endAdornment: (
                 <Tooltip title="Search">
-                  <IconButton>
+                  <IconButton edge="end">
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
@@ -226,7 +227,7 @@ const DataTable = () => {
             }}
           />
         </Grid>
-        <Grid item xs={3} sm={6} md={4}>
+        <Grid item xs={12} sm={4} md={3}>
           <FormControl fullWidth variant="outlined" margin="normal">
             <InputLabel id="column-select-label">Columns</InputLabel>
             <Select
@@ -250,13 +251,13 @@ const DataTable = () => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={1} sm={12} md={4}>
+        <Grid item xs={12} sm={12} md={3}>
           <Button variant="contained" color="secondary" onClick={handleReset} fullWidth>
             Reset
           </Button>
         </Grid>
       </Grid>
-      <TableContainer style={{ maxHeight: '60vh', overflowY: 'auto', overflowX: 'auto' }}>
+      <TableContainer component={Paper} style={{ maxHeight: '60vh', overflow: 'auto' }}>
         <Table stickyHeader>
           <TableHeader columns={visibleColumns} sortConfig={sortConfig} onSort={handleSort} />
           <TableBody>
@@ -274,6 +275,7 @@ const DataTable = () => {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{ mt: 2 }}
       />
     </Paper>
   );
