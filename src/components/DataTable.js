@@ -58,6 +58,7 @@ const DataTable = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filterExpanded, setFilterExpanded] = useState(false); // State to control Accordion
 
   const debouncedFilters = useDebounce(filters, 300);
 
@@ -158,13 +159,17 @@ const DataTable = () => {
 
   const renderFilterInput = (column) => {
     const handleChange = (event) => handleFilterChange(column, event.target.value);
-    if (typeof data[0][column] === 'string') {
-      return <TextField label={`Filter by ${column}`} variant="outlined" fullWidth onChange={handleChange} />;
-    }
-    if (typeof data[0][column] === 'number') {
-      return <TextField type="number" label={`Filter by ${column}`} variant="outlined" fullWidth onChange={handleChange} />;
-    }
-    return null;
+    return (
+      <TextField
+        label={`Filter by ${column}`}
+        variant="outlined"
+        size="small"
+        fullWidth
+        margin="dense"
+        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
+        onChange={handleChange}
+      />
+    );
   };
 
   if (loading) {
@@ -186,8 +191,63 @@ const DataTable = () => {
   }
 
   return (
-    <Paper elevation={3} style={{ padding: 16 }}>
-      <Accordion>
+    <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
+      <Box mb={3}>
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs={12} md={4}>
+            <TextField
+              label="Search"
+              variant="outlined"
+              size="small"
+              fullWidth
+              margin="dense"
+              value={filterText}
+              onChange={handleFilterTextChange}
+              InputProps={{
+                endAdornment: (
+                  <Tooltip title="Search">
+                    <IconButton edge="end">
+                      <SearchIcon />
+                    </IconButton>
+                  </Tooltip>
+                ),
+              }}
+              sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <FormControl size="small" variant="outlined" fullWidth>
+              <InputLabel id="column-select-label">Columns</InputLabel>
+              <Select
+                labelId="column-select-label"
+                id="column-select"
+                multiple
+                value={visibleColumns}
+                onChange={handleColumnToggle}
+                renderValue={(selected) => (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    {selected.length === allColumns.length ? 'All Columns' : selected.join(', ')}
+                  </div>
+                )}
+                sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
+              >
+                {allColumns.map((column) => (
+                  <MenuItem key={column} value={column}>
+                    <Checkbox checked={visibleColumns.includes(column)} />
+                    <ListItemText primary={column} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Button variant="contained" color="secondary" onClick={handleReset} fullWidth size="small">
+              Reset
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+      <Accordion expanded={filterExpanded} onChange={() => setFilterExpanded(!filterExpanded)}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} id="filter-accordion-header">
           <Typography variant="h6">Filters</Typography>
         </AccordionSummary>
@@ -199,65 +259,10 @@ const DataTable = () => {
               </Grid>
             ))}
           </Grid>
-          <Box display="flex" justifyContent="flex-end" mt={2}>
-            <Button variant="outlined" color="primary" onClick={() => setFilters({})}>
-              Clear Filters
-            </Button>
-          </Box>
         </AccordionDetails>
       </Accordion>
       <Divider sx={{ my: 2 }} />
-      <Grid container spacing={2} alignItems="center" mb={2}>
-        <Grid item xs={12} sm={8} md={6}>
-          <TextField
-            label="Search"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={filterText}
-            onChange={handleFilterTextChange}
-            InputProps={{
-              endAdornment: (
-                <Tooltip title="Search">
-                  <IconButton edge="end">
-                    <SearchIcon />
-                  </IconButton>
-                </Tooltip>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={4} md={3}>
-          <FormControl fullWidth variant="outlined" margin="normal">
-            <InputLabel id="column-select-label">Columns</InputLabel>
-            <Select
-              labelId="column-select-label"
-              id="column-select"
-              multiple
-              value={visibleColumns}
-              onChange={handleColumnToggle}
-              renderValue={(selected) => (
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                  {selected.length === allColumns.length ? 'All Columns' : selected.join(', ')}
-                </div>
-              )}
-            >
-              {allColumns.map((column) => (
-                <MenuItem key={column} value={column}>
-                  <Checkbox checked={visibleColumns.includes(column)} />
-                  <ListItemText primary={column} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} sm={12} md={3}>
-          <Button variant="contained" color="secondary" onClick={handleReset} fullWidth>
-            Reset
-          </Button>
-        </Grid>
-      </Grid>
-      <TableContainer component={Paper} style={{ maxHeight: '60vh', overflow: 'auto' }}>
+      <TableContainer sx={{ maxHeight: '60vh', overflowY: 'auto', overflowX: 'auto' }}>
         <Table stickyHeader>
           <TableHeader columns={visibleColumns} sortConfig={sortConfig} onSort={handleSort} />
           <TableBody>
