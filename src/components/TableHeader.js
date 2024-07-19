@@ -16,11 +16,11 @@ const TableHeader = ({ columns, sortConfig, onSort }) => {
             style={{
               position: 'sticky',
               top: 0,
-              left: index < 2 ? `${index * 0}px` : 'auto', // Adjust the position for the first two columns
-              zIndex: index < 2 ? 2 : 1, // Ensure headers and sticky columns have higher z-index
+              left: index < 2 ? `${index * 0}px` : 'auto',
+              zIndex: index < 2 ? 2 : 1, 
               backgroundColor: '#fafafa',
               borderRight: '1px solid #ddd',
-              width: '150px', // Adjust width as needed
+              width: '150px', 
             }}
           >
             <TableSortLabel

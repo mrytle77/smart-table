@@ -63,7 +63,6 @@ const DataTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const response = await axios.get('https://mocki.io/v1/2f46dfdc-dd38-4bd5-a81b-7bb6d336d018');
         const response = await axios.get('https://mocki.io/v1/8c16602d-78a0-42e4-b9a2-40f1a7e40cca');
         const initialColumns = response.data.length ? Object.keys(response.data[0]) : [];
         setData(response.data);
