@@ -16,6 +16,8 @@ import {
   TablePagination,
   CircularProgress,
   Typography,
+  IconButton,
+  Tooltip,
   Box,
   Accordion,
   AccordionSummary,
@@ -23,10 +25,10 @@ import {
   Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 import TableHeader from './TableHeader';
 import TableRowComponent from './TableRow';
 
-// Optional: debounce hook to limit re-rendering
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -45,7 +47,9 @@ const useDebounce = (value, delay) => {
 
 const DataTable = () => {
   const [data, setData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
   const [filters, setFilters] = useState({});
+  const [filterText, setFilterText] = useState('');
   const [sortConfig, setSortConfig] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState([]);
   const [allColumns, setAllColumns] = useState([]);
@@ -54,15 +58,16 @@ const DataTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Debounce filterText to improve performance
   const debouncedFilters = useDebounce(filters, 300);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://mocki.io/v1/2f46dfdc-dd38-4bd5-a81b-7bb6d336d018');
+        // const response = await axios.get('https://mocki.io/v1/2f46dfdc-dd38-4bd5-a81b-7bb6d336d018');
+        const response = await axios.get('https://mocki.io/v1/8c16602d-78a0-42e4-b9a2-40f1a7e40cca');
         const initialColumns = response.data.length ? Object.keys(response.data[0]) : [];
         setData(response.data);
+        setOriginalData(response.data);
         setAllColumns(initialColumns);
         setVisibleColumns(initialColumns);
         setLoading(false);
@@ -75,14 +80,17 @@ const DataTable = () => {
   }, []);
 
   const handleSort = (column) => {
-    const isColumnSorted = sortConfig.find(config => config.key === column);
-    const newDirection = isColumnSorted && isColumnSorted.direction === 'asc' ? 'desc' : 'asc';
+    const existingConfig = sortConfig.find(config => config.key === column);
+    let newSortConfig;
 
-    const newSortConfig = isColumnSorted
-      ? sortConfig.map(config =>
-          config.key === column ? { ...config, direction: newDirection } : config
-        )
-      : [...sortConfig, { key: column, direction: newDirection }];
+    if (existingConfig) {
+      const newDirection = existingConfig.direction === 'asc' ? 'desc' : 'asc';
+      newSortConfig = sortConfig.map(config =>
+        config.key === column ? { ...config, direction: newDirection } : config
+      );
+    } else {
+      newSortConfig = [...sortConfig, { key: column, direction: 'asc' }];
+    }
 
     setSortConfig(newSortConfig);
   };
@@ -92,6 +100,10 @@ const DataTable = () => {
       ...filters,
       [column]: value,
     });
+  };
+
+  const handleFilterTextChange = (event) => {
+    setFilterText(event.target.value);
   };
 
   const handleColumnToggle = (event) => {
@@ -110,6 +122,16 @@ const DataTable = () => {
     setPage(0);
   };
 
+  const handleReset = () => {
+    setData(originalData);
+    setFilters({});
+    setFilterText('');
+    setSortConfig([]);
+    setVisibleColumns(allColumns);
+    setPage(0);
+    setRowsPerPage(10);
+  };
+
   const filteredData = data.filter((item) => {
     return Object.keys(debouncedFilters).every((key) => {
       const value = debouncedFilters[key];
@@ -120,9 +142,8 @@ const DataTable = () => {
       if (typeof value === 'number') {
         return item[key] === value;
       }
-      // Add more filter types as needed
       return true;
-    });
+    }) && visibleColumns.some((column) => item[column].toString().toLowerCase().includes(filterText.toLowerCase()));
   });
 
   const sortedData = [...filteredData].sort((a, b) => {
@@ -143,7 +164,6 @@ const DataTable = () => {
     if (typeof data[0][column] === 'number') {
       return <TextField type="number" label={`Filter by ${column}`} variant="outlined" fullWidth onChange={handleChange} />;
     }
-    // Add more conditions for different types (date, etc.)
     return null;
   };
 
@@ -211,9 +231,33 @@ const DataTable = () => {
             </Select>
           </FormControl>
         </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <TextField
+            label="Filter"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={filterText}
+            onChange={handleFilterTextChange}
+            InputProps={{
+              endAdornment: (
+                <Tooltip title="Search">
+                  <IconButton>
+                    <SearchIcon />
+                  </IconButton>
+                </Tooltip>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={12} md={4}>
+          <Button variant="contained" color="secondary" onClick={handleReset} fullWidth>
+            Reset
+          </Button>
+        </Grid>
       </Grid>
-      <TableContainer>
-        <Table>
+      <TableContainer style={{ maxHeight: '60vh', overflowY: 'auto', overflowX: 'auto' }}>
+        <Table stickyHeader>
           <TableHeader columns={visibleColumns} sortConfig={sortConfig} onSort={handleSort} />
           <TableBody>
             {paginatedData.map((row, index) => (
